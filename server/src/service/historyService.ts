@@ -1,34 +1,35 @@
 // TODO: Define a City class with name and id properties
 
-export class HistoryService {
+class City {
   name: string;
   id: string;
 
   constructor(name: string, id: string) {
     this.name = name;
-    this.id = id;
+    this.id = Date.now().toString();
   }
+}
 
 
 
 
 // TODO: Complete the HistoryService class
 
-
 class HistoryService {
-  name: string;
-  id: string;
-
-  constructor(name: string, id: string) {
-    this.name = name;
-    this.id = id;
+  private filePath: string;
+  
+  constructor() {
+    this.filePath = path.join(__dirname, '..', 'data', 'searchHistory.json');
+  }
+    
+    // Add methods here later  
   }
 
+// TODO: Define a read method that reads from the searchHistory.json file
+
+private
 
 
-
-  // TODO: Define a read method that reads from the searchHistory.json file
-  // private async read() {}
   // TODO: Define a write method that writes the updated cities array to the searchHistory.json file
   // private async write(cities: City[]) {}
   // TODO: Define a getCities method that reads the cities from the searchHistory.json file and returns them as an array of City objects
