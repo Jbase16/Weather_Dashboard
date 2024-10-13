@@ -51,11 +51,24 @@ private async read(): Promise<City[]> {
     return this.read();
   }
 
-
   // TODO Define an addCity method that adds a city to the searchHistory.json file
-  // async addCity(city: string) {}
+  
+  asynnc addCity(cityName: string): Promise<void> {
+    const cities = await this.read();
+    const newCity = new City(cityName);
+    cities.push(newCity);
+    await this.write(cities);
+  }
+
   // * BONUS TODO: Define a removeCity method that removes a city from the searchHistory.json file
+  
+  async removeCity(cityId: string); Promise<void>; {
+    let cities = await this.read();
+    cities =cities.filter(city => city.id !== cityId);
+    await this.write(cities);
+  }
+    
   // async removeCity(id: string) {}
-}
+
 
 export default new HistoryService();
