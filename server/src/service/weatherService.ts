@@ -10,6 +10,18 @@ interface Coordinates {
 
 // TODO: Define a class for the Weather object
 
+class Weather {
+  temperature: number;
+  windSpeed: number;
+  humidity: number;
+
+  constructor(temperature: number, windSpeed: number, humidity: number) {
+    this.temperature = temperature;
+    this.windSpeed = windSpeed;
+    this.humidity = humidity;
+  }
+}
+
 // TODO: Complete the WeatherService class
 class WeatherService {
   // TODO: Define the baseURL, API key, and city name properties
