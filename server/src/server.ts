@@ -1,26 +1,52 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url"; // Import fileURLToPath from 'url' module
 import axios from "axios";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
+import routes from "./routes/index.js"; // Import the central router from the routes folder
 
 dotenv.config(); // Load environment variables from .env file
 
+// Get the directory name using import.meta.url
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Initialize the Express application
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// 1. Serve static files from the 'client' folder
+// This line serves all the client-side static assets, such as CSS, JS, and HTML
 app.use(express.static(path.join(__dirname, "../../client")));
-app.use(express.json());
 
+// 2. Middleware for parsing request bodies
+// Middleware to parse JSON request bodies
+app.use(express.json());
+// Middleware to parse URL-encoded request bodies
+app.use(express.urlencoded({ extended: true }));
+
+// 3. Implement middleware to connect the routes from 'index.ts'
+// This will connect all the API and HTML routes defined in your router files.
+app.use(routes);
+
+// Example file path for storing search history
 const searchHistoryPath = path.join(__dirname, "../db/searchHistory.json");
 
-app.get("*", (_, res) => {
+// 4. Fallback route to serve the main HTML page
+// This is used to serve the main index.html for any unmatched routes to enable SPA (Single Page Application) behavior.
+app.get("*", (_: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../client/index.html"));
 });
 
-// API Route: Get Search History
-app.get("/api/weather/history", (_, res) => {
+// 5. Start the server and listen on the specified port
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+// GET /api/weather/history: Get the search history
+app.get("/api/weather/history", (_, res: Response) => {
   fs.readFile(searchHistoryPath, "utf8", (err, data) => {
     if (err) {
       res.status(500).json({ error: "Could not read search history" });
@@ -30,8 +56,8 @@ app.get("/api/weather/history", (_, res) => {
   });
 });
 
-// API Route: Post Weather Data for City
-app.post("/api/weather", async (req, res) => {
+// POST /api/weather: Add city weather data to search history
+app.post("/api/weather", async (req: Request, res: Response) => {
   const { city } = req.body;
 
   if (!city) {
@@ -40,6 +66,7 @@ app.post("/api/weather", async (req, res) => {
   }
 
   try {
+    // Get coordinates for the city using OpenWeatherMap Geocoding API
     const geoResponse = await axios.get(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${process.env.API_KEY}`
     );
@@ -50,10 +77,13 @@ app.post("/api/weather", async (req, res) => {
     }
 
     const { lat, lon } = geoResponse.data[0];
+
+    // Get the 5-day weather forecast data for the coordinates
     const weatherResponse = await axios.get(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${process.env.API_KEY}`
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${process.env.c6d2bdc1894f94cef0bb2e192a210c0c}`
     );
 
+    // Add the city data with a unique ID to searchHistory.json
     const cityData = {
       id: uuidv4(),
       name: city,
@@ -85,8 +115,8 @@ app.post("/api/weather", async (req, res) => {
   }
 });
 
-// API Route: Delete City from Search History
-app.delete("/api/weather/history/:id", (req, res) => {
+// DELETE /api/weather/history/:id: Delete city from search history by ID
+app.delete("/api/weather/history/:id", (req: Request, res: Response) => {
   const { id } = req.params;
 
   fs.readFile(searchHistoryPath, "utf8", (err, data) => {
@@ -114,15 +144,3 @@ app.delete("/api/weather/history/:id", (req, res) => {
     );
   });
 });
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-
-// import routes from "./routes/index.js";
-
-// TODO: Serve static files of entire client dist folder
-
-// TODO: Implement middleware for parsing JSON and urlencoded form data
-
-// TODO: Implement middleware to connect the routes
