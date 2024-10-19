@@ -1,32 +1,16 @@
 import './styles/jass.css';
 
 // * All necessary DOM elements selected
-const searchForm: HTMLFormElement = document.getElementById(
-  'search-form'
-) as HTMLFormElement;
-const searchInput: HTMLInputElement = document.getElementById(
-  'search-input'
-) as HTMLInputElement;
-const todayContainer = document.querySelector('#today') as HTMLDivElement;
-const forecastContainer = document.querySelector('#forecast') as HTMLDivElement;
-const searchHistoryContainer = document.getElementById(
-  'history'
-) as HTMLDivElement;
-const heading: HTMLHeadingElement = document.getElementById(
-  'search-title'
-) as HTMLHeadingElement;
-const weatherIcon: HTMLImageElement = document.getElementById(
-  'weather-img'
-) as HTMLImageElement;
-const tempEl: HTMLParagraphElement = document.getElementById(
-  'temp'
-) as HTMLParagraphElement;
-const windEl: HTMLParagraphElement = document.getElementById(
-  'wind'
-) as HTMLParagraphElement;
-const humidityEl: HTMLParagraphElement = document.getElementById(
-  'humidity'
-) as HTMLParagraphElement;
+const searchForm = document.getElementById('search-form') as HTMLFormElement | null;
+const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+const todayContainer = document.querySelector('#today') as HTMLDivElement | null;
+const forecastContainer = document.querySelector('#forecast') as HTMLDivElement | null;
+const searchHistoryContainer = document.getElementById('history') as HTMLDivElement | null;
+const heading = document.getElementById('search-title') as HTMLHeadingElement | null;
+const weatherIcon = document.getElementById('weather-img') as HTMLImageElement | null;
+const tempEl = document.getElementById('temp') as HTMLParagraphElement | null;
+const windEl = document.getElementById('wind') as HTMLParagraphElement | null;
+const humidityEl = document.getElementById('humidity') as HTMLParagraphElement | null;
 
 /*
 
@@ -34,7 +18,7 @@ API Calls
 
 */
 
-const fetchWeather = async (cityName: string) => {
+const fetchWeather = async (cityName: string): Promise<void> => {
   const response = await fetch('/api/weather/', {
     method: 'POST',
     headers: {
@@ -51,17 +35,16 @@ const fetchWeather = async (cityName: string) => {
   renderForecast(weatherData.slice(1));
 };
 
-const fetchSearchHistory = async () => {
-  const history = await fetch('/api/weather/history', {
+const fetchSearchHistory = async (): Promise<Response> => {
+  return await fetch('/api/weather/history', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   });
-  return history;
 };
 
-const deleteCityFromHistory = async (id: string) => {
+const deleteCityFromHistory = async (id: string): Promise<void> => {
   await fetch(`/api/weather/history/${id}`, {
     method: 'DELETE',
     headers: {
@@ -77,29 +60,26 @@ Render Functions
 */
 
 const renderCurrentWeather = (currentWeather: any): void => {
-  const { city, date, icon, iconDescription, tempF, windSpeed, humidity } =
-    currentWeather;
+  const { city, date, icon, iconDescription, tempF, windSpeed, humidity } = currentWeather;
 
-  // convert the following to typescript
-  heading.textContent = `${city} (${date})`;
-  weatherIcon.setAttribute(
-    'src',
-    `https://openweathermap.org/img/w/${icon}.png`
-  );
-  weatherIcon.setAttribute('alt', iconDescription);
-  weatherIcon.setAttribute('class', 'weather-img');
-  heading.append(weatherIcon);
-  tempEl.textContent = `Temp: ${tempF}°F`;
-  windEl.textContent = `Wind: ${windSpeed} MPH`;
-  humidityEl.textContent = `Humidity: ${humidity} %`;
+  if (heading && weatherIcon && tempEl && windEl && humidityEl) {
+    heading.textContent = `${city} (${date})`;
+    weatherIcon.setAttribute('src', `https://openweathermap.org/img/w/${icon}.png`);
+    weatherIcon.setAttribute('alt', iconDescription);
+    weatherIcon.setAttribute('class', 'weather-img');
+    heading.append(weatherIcon);
+    tempEl.textContent = `Temp: ${tempF}°F`;
+    windEl.textContent = `Wind: ${windSpeed} MPH`;
+    humidityEl.textContent = `Humidity: ${humidity} %`;
 
-  if (todayContainer) {
-    todayContainer.innerHTML = '';
-    todayContainer.append(heading, tempEl, windEl, humidityEl);
+    if (todayContainer) {
+      todayContainer.innerHTML = '';
+      todayContainer.append(heading, tempEl, windEl, humidityEl);
+    }
   }
 };
 
-const renderForecast = (forecast: any): void => {
+const renderForecast = (forecast: any[]): void => {
   const headingCol = document.createElement('div');
   const heading = document.createElement('h4');
 
@@ -117,18 +97,14 @@ const renderForecast = (forecast: any): void => {
   }
 };
 
-const renderForecastCard = (forecast: any) => {
+const renderForecastCard = (forecast: any): void => {
   const { date, icon, iconDescription, tempF, windSpeed, humidity } = forecast;
 
-  const { col, cardTitle, weatherIcon, tempEl, windEl, humidityEl } =
-    createForecastCard();
+  const { col, cardTitle, weatherIcon, tempEl, windEl, humidityEl } = createForecastCard();
 
   // Add content to elements
   cardTitle.textContent = date;
-  weatherIcon.setAttribute(
-    'src',
-    `https://openweathermap.org/img/w/${icon}.png`
-  );
+  weatherIcon.setAttribute('src', `https://openweathermap.org/img/w/${icon}.png`);
   weatherIcon.setAttribute('alt', iconDescription);
   tempEl.textContent = `Temp: ${tempF} °F`;
   windEl.textContent = `Wind: ${windSpeed} MPH`;
@@ -139,15 +115,14 @@ const renderForecastCard = (forecast: any) => {
   }
 };
 
-const renderSearchHistory = async (searchHistory: any) => {
+const renderSearchHistory = async (searchHistory: Response): Promise<void> => {
   const historyList = await searchHistory.json();
 
   if (searchHistoryContainer) {
     searchHistoryContainer.innerHTML = '';
 
     if (!historyList.length) {
-      searchHistoryContainer.innerHTML =
-        '<p class="text-center">No Previous Search History</p>';
+      searchHistoryContainer.innerHTML = '<p class="text-center">No Previous Search History</p>';
     }
 
     // * Start at end of history array and count down to show the most recent cities at the top.
@@ -164,7 +139,14 @@ Helper Functions
 
 */
 
-const createForecastCard = () => {
+const createForecastCard = (): {
+  col: HTMLDivElement;
+  cardTitle: HTMLHeadingElement;
+  weatherIcon: HTMLImageElement;
+  tempEl: HTMLParagraphElement;
+  windEl: HTMLParagraphElement;
+  humidityEl: HTMLParagraphElement;
+} => {
   const col = document.createElement('div');
   const card = document.createElement('div');
   const cardBody = document.createElement('div');
@@ -179,13 +161,7 @@ const createForecastCard = () => {
   cardBody.append(cardTitle, weatherIcon, tempEl, windEl, humidityEl);
 
   col.classList.add('col-auto');
-  card.classList.add(
-    'forecast-card',
-    'card',
-    'text-white',
-    'bg-primary',
-    'h-100'
-  );
+  card.classList.add('forecast-card', 'card', 'text-white', 'bg-primary', 'h-100');
   cardBody.classList.add('card-body', 'p-2');
   cardTitle.classList.add('card-title');
   tempEl.classList.add('card-text');
@@ -202,7 +178,7 @@ const createForecastCard = () => {
   };
 };
 
-const createHistoryButton = (city: string) => {
+const createHistoryButton = (city: string): HTMLButtonElement => {
   const btn = document.createElement('button');
   btn.setAttribute('type', 'button');
   btn.setAttribute('aria-controls', 'today forecast');
@@ -212,29 +188,22 @@ const createHistoryButton = (city: string) => {
   return btn;
 };
 
-const createDeleteButton = () => {
+const createDeleteButton = (): HTMLButtonElement => {
   const delBtnEl = document.createElement('button');
   delBtnEl.setAttribute('type', 'button');
-  delBtnEl.classList.add(
-    'fas',
-    'fa-trash-alt',
-    'delete-city',
-    'btn',
-    'btn-danger',
-    'col-2'
-  );
+  delBtnEl.classList.add('fas', 'fa-trash-alt', 'delete-city', 'btn', 'btn-danger', 'col-2');
 
   delBtnEl.addEventListener('click', handleDeleteHistoryClick);
   return delBtnEl;
 };
 
-const createHistoryDiv = () => {
+const createHistoryDiv = (): HTMLDivElement => {
   const div = document.createElement('div');
   div.classList.add('display-flex', 'gap-2', 'col-12', 'm-1');
   return div;
 };
 
-const buildHistoryListItem = (city: any) => {
+const buildHistoryListItem = (city: any): HTMLDivElement => {
   const newBtn = createHistoryButton(city.name);
   const deleteBtn = createDeleteButton();
   deleteBtn.dataset.city = JSON.stringify(city);
@@ -249,30 +218,34 @@ Event Handlers
 
 */
 
-const handleSearchFormSubmit = (event: any): void => {
+const handleSearchFormSubmit = (event: Event): void => {
   event.preventDefault();
 
-  if (!searchInput.value) {
+  if (searchInput && !searchInput.value) {
     throw new Error('City cannot be blank');
   }
 
-  const search: string = searchInput.value.trim();
+  const search: string = searchInput?.value.trim() || '';
   fetchWeather(search).then(() => {
     getAndRenderHistory();
   });
-  searchInput.value = '';
+  if (searchInput) {
+    searchInput.value = '';
+  }
 };
 
-const handleSearchHistoryClick = (event: any) => {
-  if (event.target.matches('.history-btn')) {
-    const city = event.target.textContent;
+const handleSearchHistoryClick = (event: Event): void => {
+  const target = event.target as HTMLElement;
+  if (target.matches('.history-btn')) {
+    const city = target.textContent || '';
     fetchWeather(city).then(getAndRenderHistory);
   }
 };
 
-const handleDeleteHistoryClick = (event: any) => {
+const handleDeleteHistoryClick = (event: Event): void => {
   event.stopPropagation();
-  const cityID = JSON.parse(event.target.getAttribute('data-city')).id;
+  const target = event.target as HTMLElement;
+  const cityID = JSON.parse(target.getAttribute('data-city') || '{}').id;
   deleteCityFromHistory(cityID).then(getAndRenderHistory);
 };
 
@@ -282,8 +255,9 @@ Initial Render
 
 */
 
-const getAndRenderHistory = () =>
+const getAndRenderHistory = (): void => {
   fetchSearchHistory().then(renderSearchHistory);
+};
 
 searchForm?.addEventListener('submit', handleSearchFormSubmit);
 searchHistoryContainer?.addEventListener('click', handleSearchHistoryClick);

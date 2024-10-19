@@ -24,30 +24,24 @@ class Weather {
 
 // Complete the WeatherService class
 
-// Define the baseURL, API key, and city name properties
-
+// Define the baseURL and API key properties
 
 class WeatherService {
   private baseURL: string;
   private apiKey: string;
-  private cityName: string;
 
   constructor() {
     this.baseURL = 'https://api.openweathermap.org/data/2.5/';
     this.apiKey = 'c6d2bdc1894f94cef0bb2e192a210c0c';
-    this.cityName = '';
-    
   }
-
 
   //Create fetchLocationData method
   
-private async fetchLocationData(query: string): Promise<any> {
-  const url = `${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.apiKey}`;
-  const response = await fetch(url);
-  return response.json();
-
-}
+  private async fetchLocationData(query: string): Promise<any> {
+    const url = `${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.apiKey}`;
+    const response = await fetch(url);
+    return response.json();
+  }
 
   //Create destructureLocationData method
 
@@ -55,14 +49,6 @@ private async fetchLocationData(query: string): Promise<any> {
     const { lat, lon } = locationData[0];
     return { lat, lon };
   }
-
-
-  //Create buildGeocodeQuery method
-
-  private buildGeocodeQuery(query: string): string {
-    return `${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.apiKey}`;
-  }
-
 
   //Create buildWeatherQuery method
   
@@ -93,14 +79,6 @@ private async fetchLocationData(query: string): Promise<any> {
     const { humidity } = response.list[0].main;
 
     return new Weather(temp, speed, humidity);
-  
-  }
-  //Complete buildForecastArray method
-  
-  private buildForecastArray(currentWeather: Weather, weatherData: any[]): Weather[] {
-    return weatherData.map(day => {
-      return new Weather(day.main.temp, day.wind.speed, day.main.humidity);
-    });
   }
 
   //Complete getWeatherForCity method
@@ -111,7 +89,5 @@ private async fetchLocationData(query: string): Promise<any> {
     return this.parseCurrentWeather(weatherData);
   }
 }
-
-
 
 export default new WeatherService();
