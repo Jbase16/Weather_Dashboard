@@ -59,9 +59,13 @@ private async fetchLocationData(query: string): Promise<any> {
     return `${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.apiKey}`;
   }
 
-  
+
   // TODO: Create buildWeatherQuery method
-  // private buildWeatherQuery(coordinates: Coordinates): string {}
+  
+  private buildWeatherQuery(coordinates: Coordinates): string {
+    return `${this.baseURL}/forecast?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}`;
+  }
+  
   // TODO: Create fetchAndDestructureLocationData method
   private async fetchAndDestructureLocationData(query: string): Promise<Coordinates> {
     const locationData: Coordinates = await this.fetchLocationData(query);
