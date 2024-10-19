@@ -30,6 +30,7 @@ class WeatherService {
   constructor() {
     this.baseURL = 'https://api.openweathermap.org/data/2.5/';
     this.apiKey = 'c6d2bdc1894f94cef0bb2e192a210c0c';
+    }
 
 
 // TODO: Define the baseURL, API key, and city name properties
@@ -102,6 +103,7 @@ private async fetchLocationData(query: string): Promise<any> {
     const coordinates = await this.fetchAndDestructureLocationData(city);
     const weatherData = await this.fetchWeatherData(coordinates);
     return this.parseCurrentWeather(weatherData);
+  }
   }
 
 
