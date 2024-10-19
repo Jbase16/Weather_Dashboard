@@ -1,5 +1,15 @@
 // TODO: Define a City class with name and id properties
 
+class City {
+  name: string;
+  id: string;
+
+  constructor(id: string, name: string) {
+    this.id = id;
+    this.name = name;
+  }
+}
+
 // TODO: Complete the HistoryService class
 class HistoryService {
   // TODO: Define a read method that reads from the searchHistory.json file

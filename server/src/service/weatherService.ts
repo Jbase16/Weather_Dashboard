@@ -1,14 +1,14 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-// TODO: Define an interface for the Coordinates object
+// Define an interface for the Coordinates object
 
 interface Coordinates {
   lat: number;
   lon: number;
 }
 
-// TODO: Define a class for the Weather object
+// Define a class for the Weather object
 
 class Weather {
   temperature: number;
@@ -22,7 +22,11 @@ class Weather {
   }
 }
 
-// TODO: Complete the WeatherService class
+// Complete the WeatherService class
+
+// Define the baseURL, API key, and city name properties
+
+
 class WeatherService {
   private baseURL: string;
   private apiKey: string;
@@ -36,10 +40,6 @@ class WeatherService {
   }
 
 
-// TODO: Define the baseURL, API key, and city name properties
-
-
-
   //Create fetchLocationData method
   
 private async fetchLocationData(query: string): Promise<any> {
@@ -50,6 +50,7 @@ private async fetchLocationData(query: string): Promise<any> {
 }
 
   //Create destructureLocationData method
+
   private destructureLocationData(locationData: any): Coordinates {
     const { lat, lon } = locationData[0];
     return { lat, lon };
@@ -70,12 +71,14 @@ private async fetchLocationData(query: string): Promise<any> {
   }
   
   //Create fetchAndDestructureLocationData method
+
   private async fetchAndDestructureLocationData(query: string): Promise<Coordinates> {
     const locationData = await this.fetchLocationData(query);
     return this.destructureLocationData(locationData);
   }
 
   //Create fetchWeatherData method
+
   private async fetchWeatherData(coordinates: Coordinates): Promise<any> {
     const url = this.buildWeatherQuery(coordinates);
     const response = await fetch(url);
@@ -107,7 +110,7 @@ private async fetchLocationData(query: string): Promise<any> {
     const weatherData = await this.fetchWeatherData(coordinates);
     return this.parseCurrentWeather(weatherData);
   }
-  }
+}
 
 
 
