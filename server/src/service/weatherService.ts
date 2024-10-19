@@ -68,17 +68,31 @@ private async fetchLocationData(query: string): Promise<any> {
   
   // TODO: Create fetchAndDestructureLocationData method
   private async fetchAndDestructureLocationData(query: string): Promise<Coordinates> {
-    const locationData: Coordinates = await this.fetchLocationData(query);
+    const locationData = await this.fetchLocationData(query);
     return this.destructureLocationData(locationData);
   }
+
   // TODO: Create fetchWeatherData method
-  // private async fetchWeatherData(coordinates: Coordinates) {}
+  private async fetchWeatherData(coordinates: Coordinates): Promise<any> {
+    const url = this.buildWeatherQuery(coordinates);
+    const response = await fetch(url);
+    return response.json();
+  }
+
   // TODO: Build parseCurrentWeather method
-  // private parseCurrentWeather(response: any) {}
+  
+  private parseCurrentWeather(response: any): Weather {
+    const { temp } = response.list[0].main;
+    const { speed } = response.list[0].wind;
+    const { humidity } = response.list[0].main;
+
+    return new Weather(temp, speed, humidity);
+  
+  }
   // TODO: Complete buildForecastArray method
   // private buildForecastArray(currentWeather: Weather, weatherData: any[]) {}
   // TODO: Complete getWeatherForCity method
   // async getWeatherForCity(city: string) {}
-}
+
 
 export default new WeatherService();
