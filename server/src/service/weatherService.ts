@@ -29,7 +29,7 @@ class WeatherService {
 
   constructor() {
     this.baseURL = 'https://api.openweathermap.org/data/2.5/';
-    this.apiKey = process.env.WEATHER_API_KEY || '';
+    this.apiKey = 'c6d2bdc1894f94cef0bb2e192a210c0c';
  }
 }
 
@@ -40,12 +40,12 @@ class WeatherService {
   // TODO: Create fetchLocationData method
   
 private async fetchLocationData(query: string): Promise<any> {
-  const url = `${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.apiKey}';
+  const url = `${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.apiKey}`;
   const response = await fetch(url);
   return response.json();
 
 }
-  
+
   // TODO: Create destructureLocationData method
   private destructureLocationData(locationData: any): Coordinates {
     const { lat, lon } = locationData[0];
