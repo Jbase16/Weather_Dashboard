@@ -30,8 +30,7 @@ class WeatherService {
   constructor() {
     this.baseURL = 'https://api.openweathermap.org/data/2.5/';
     this.apiKey = 'c6d2bdc1894f94cef0bb2e192a210c0c';
- }
-}
+
 
 // TODO: Define the baseURL, API key, and city name properties
 
@@ -90,9 +89,21 @@ private async fetchLocationData(query: string): Promise<any> {
   
   }
   // TODO: Complete buildForecastArray method
-  // private buildForecastArray(currentWeather: Weather, weatherData: any[]) {}
+  
+  private buildForecastArray(currentWeather: Weather, weatherData: any[]): Weather[] {
+    return weatherData.map(day => {
+      return new Weather(day.main.temp, day.wind.speed, day.main.humidity);
+    });
+  }
+
   // TODO: Complete getWeatherForCity method
-  // async getWeatherForCity(city: string) {}
+  
+  async getWeatherForCity(city: string): Promise<Weather> {
+    const coordinates = await this.fetchAndDestructureLocationData(city);
+    const weatherData = await this.fetchWeatherData(coordinates);
+    return this.parseCurrentWeather(weatherData);
+  }
+
 
 
 export default new WeatherService();
