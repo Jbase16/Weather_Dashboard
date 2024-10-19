@@ -24,12 +24,32 @@ class Weather {
 
 // TODO: Complete the WeatherService class
 class WeatherService {
-  // TODO: Define the baseURL, API key, and city name properties
+  private baseURL: string;
+  private apiKey: string;
+
+  constructor() {
+    this.baseURL = 'https://api.openweathermap.org/data/2.5/';
+    this.apiKey = process.env.WEATHER_API_KEY || '';
+ }
+}
+
+// TODO: Define the baseURL, API key, and city name properties
+
+
+
   // TODO: Create fetchLocationData method
-  // private async fetchLocationData(query: string) {}
+  
+private async fetchLocationData(query: string): Promise<any> {
+  const url = `${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.apiKey}';
+  const response = await fetch(url);
+  return response.json();
+
+}
+  
   // TODO: Create destructureLocationData method
-  private destructureLocationData(locationData: Coordinates): Coordinates {
-    return locationData;
+  private destructureLocationData(locationData: any): Coordinates {
+    const { lat, lon } = locationData[0];
+    return { lat, lon };
   }
   // TODO: Create buildGeocodeQuery method
   // private buildGeocodeQuery(): string {}
