@@ -58,9 +58,9 @@ app.get("/api/weather/history", (_, res: Response) => {
 
 // POST /api/weather: Add city weather data to search history
 app.post("/api/weather", async (req: Request, res: Response) => {
-  const { cityName } = req.body;
+  const { city } = req.body;
 
-  if (!cityName) {
+  if (!city) {
     res.status(400).json({ error: "City name is required" });
     return;
   }
@@ -68,7 +68,7 @@ app.post("/api/weather", async (req: Request, res: Response) => {
   try {
     // Get coordinates for the city using OpenWeatherMap Geocoding API
     const geoResponse = await axios.get(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${process.env.API_KEY}`
+      `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${process.env.API_KEY}`
     );
 
     if (geoResponse.data.length === 0) {
@@ -79,22 +79,47 @@ app.post("/api/weather", async (req: Request, res: Response) => {
     const { lat, lon } = geoResponse.data[0];
 
     // Ensure API_BASE_URL is defined
-    const apiBaseUrl = process.env.API_BASE_URL;
-    const apiKey = process.env.API_KEY || '';
+    const API_BASE_URL = process.env.API_BASE_URL;
+    const API_KEY = process.env.API_KEY;
 
-    if (!apiBaseUrl) {
-      throw new Error("API_BASE_URL is not defined in the environment variables.");
+    const getWeatherData = async (lat: number, lon: number) => {
+      try {
+        if (!API_BASE_URL || !API_KEY) {
+          throw new Error("API_BASE_URL and API_KEY are required environment variables.");
+        }
+
+        const url = `${API_BASE_URL}?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+        const response = await axios.get(url);
+
+        return response.data;
+       } catch (error) {
+        console.error("Error fetching weather data:", error);
+        throw error;
+      }
+    };
+
+    if (!API_BASE_URL) {
+      throw new Error(
+        "API_BASE_URL is not defined in the environment variables."
+      );
     }
 
     // Get the 5-day weather forecast data for the coordinates
+    if (!API_KEY) {
+      throw new Error("API_KEY is not defined in the environment variables.");
+    }
+
     const weatherResponse = await axios.get(
-      apiBaseUrl.replace('{lat}', lat).replace('{lon}', lon).replace('{API key}', apiKey)
+      API_BASE_URL
+        .replace("{lat}", lat)
+        .replace("{lon}", lon)
+        .replace("{API key}", API_KEY)
     );
 
     // Add the city data with a unique ID to searchHistory.json
     const cityData = {
       id: uuidv4(),
-      name: cityName,
+      name: city,
       lat,
       lon,
     };

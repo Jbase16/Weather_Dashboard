@@ -33,15 +33,15 @@ API Calls
 
 */
 
-const fetchWeather = async (cityName: string): Promise<void> => {
+const fetchWeather = async (city: string): Promise<void> => {
   try {
     const response = await fetch("/api/weather/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ cityName }),
-    })
+      body: JSON.stringify({ city }),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to fetch weather data");
