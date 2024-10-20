@@ -78,9 +78,17 @@ app.post("/api/weather", async (req: Request, res: Response) => {
 
     const { lat, lon } = geoResponse.data[0];
 
+    // Ensure API_BASE_URL is defined
+    const apiBaseUrl = process.env.API_BASE_URL;
+    const apiKey = process.env.API_KEY || '';
+
+    if (!apiBaseUrl) {
+      throw new Error("API_BASE_URL is not defined in the environment variables.");
+    }
+
     // Get the 5-day weather forecast data for the coordinates
     const weatherResponse = await axios.get(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${process.env.c6d2bdc1894f94cef0bb2e192a210c0c}`
+      `${apiBaseUrl.replace('{lat}', lat).replace('{lon}', lon).replace('{API key}', apiKey)}`
     );
 
     // Add the city data with a unique ID to searchHistory.json
