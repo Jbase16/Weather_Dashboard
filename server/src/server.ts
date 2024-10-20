@@ -17,35 +17,41 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001; // Changed to 3001
 
-// 1. Serve static files from the 'client' folder
-// This line serves all the client-side static assets, such as CSS, JS, and HTML
+
 app.use(express.static(path.join(__dirname, "../../client")));
 
-// 2. Middleware for parsing request bodies
-// Middleware to parse JSON request bodies
+
+
 app.use(express.json());
-// Middleware to parse URL-encoded request bodies
 app.use(express.urlencoded({ extended: true }));
 
-// 3. Implement middleware to connect the routes from 'index.ts'
-// This will connect all the API and HTML routes defined in your router files.
+
 app.use(routes);
 
-// Example file path for storing search history
 const searchHistoryPath = path.join(__dirname, "../db/searchHistory.json");
 
-// 4. Fallback route to serve the main HTML page
-// This is used to serve the main index.html for any unmatched routes to enable SPA (Single Page Application) behavior.
+
+
 app.get("*", (_: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../client/index.html"));
 });
 
-// 5. Start the server and listen on the specified port
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// GET /api/weather/history: Get the search history
+  // Ensure API_BASE_URL is defined
+    const API_BASE_URL = process.env.API_BASE_URL;
+    const API_KEY = process.env.API_KEY;
+
+    if (!API_BASE_URL || !API_KEY) {
+      throw new Error(
+        "API_BASE_URL and API_KEY must be defined in environment variables"
+      );
+    }
+
+
 app.get("/api/weather/history", (_, res: Response) => {
   fs.readFile(searchHistoryPath, "utf8", (err, data) => {
     if (err) {
@@ -56,7 +62,7 @@ app.get("/api/weather/history", (_, res: Response) => {
   });
 });
 
-// POST /api/weather: Add city weather data to search history
+
 app.post("/api/weather", async (req: Request, res: Response) => {
   const { city } = req.body;
 
@@ -66,9 +72,9 @@ app.post("/api/weather", async (req: Request, res: Response) => {
   }
 
   try {
-    // Get coordinates for the city using OpenWeatherMap Geocoding API
+    
     const geoResponse = await axios.get(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${process.env.API_KEY}`
+      `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
     );
 
     if (geoResponse.data.length === 0) {
@@ -78,51 +84,25 @@ app.post("/api/weather", async (req: Request, res: Response) => {
 
     const { lat, lon } = geoResponse.data[0];
 
-    // Ensure API_BASE_URL is defined
-    const API_BASE_URL = process.env.API_BASE_URL;
-    const API_KEY = process.env.API_KEY;
+    const url = `${API_BASE_URL}lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+    const weatherResponse = await axios.get(url);
 
-    const getWeatherData = async (lat: number, lon: number) => {
-      try {
-        if (!API_BASE_URL || !API_KEY) {
-          throw new Error("API_BASE_URL and API_KEY are required environment variables.");
-        }
-
-        const url = `${API_BASE_URL}?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
-        const response = await axios.get(url);
-
-        return response.data;
-       } catch (error) {
-        console.error("Error fetching weather data:", error);
-        throw error;
-      }
-    };
-
-    if (!API_BASE_URL) {
-      throw new Error(
-        "API_BASE_URL is not defined in the environment variables."
-      );
-    }
-
-    // Get the 5-day weather forecast data for the coordinates
-    if (!API_KEY) {
-      throw new Error("API_KEY is not defined in the environment variables.");
-    }
-
-    const weatherResponse = await axios.get(
-      API_BASE_URL
-        .replace("{lat}", lat)
-        .replace("{lon}", lon)
-        .replace("{API key}", API_KEY)
-    );
-
-    // Add the city data with a unique ID to searchHistory.json
+  
     const cityData = {
       id: uuidv4(),
       name: city,
       lat,
       lon,
     };
+      
+
+    
+        
+
+    
+    
+    
+    
 
     fs.readFile(searchHistoryPath, "utf8", (err, data) => {
       let searchHistory = [];
@@ -177,3 +157,8 @@ app.delete("/api/weather/history/:id", (req: Request, res: Response) => {
     );
   });
 });
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
