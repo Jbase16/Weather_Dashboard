@@ -58,9 +58,9 @@ app.get("/api/weather/history", (_, res: Response) => {
 
 // POST /api/weather: Add city weather data to search history
 app.post("/api/weather", async (req: Request, res: Response) => {
-  const { city } = req.body;
+  const { cityName } = req.body;
 
-  if (!city) {
+  if (!cityName) {
     res.status(400).json({ error: "City name is required" });
     return;
   }
@@ -68,7 +68,7 @@ app.post("/api/weather", async (req: Request, res: Response) => {
   try {
     // Get coordinates for the city using OpenWeatherMap Geocoding API
     const geoResponse = await axios.get(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${process.env.API_KEY}`
+      `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${process.env.API_KEY}`
     );
 
     if (geoResponse.data.length === 0) {
@@ -94,7 +94,7 @@ app.post("/api/weather", async (req: Request, res: Response) => {
     // Add the city data with a unique ID to searchHistory.json
     const cityData = {
       id: uuidv4(),
-      name: city,
+      name: cityName,
       lat,
       lon,
     };

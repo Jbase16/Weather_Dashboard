@@ -7,19 +7,19 @@ const historyService = new HistoryService(); // Instantiate the service
 
 // POST Request with city name to retrieve weather data
 router.post('/', async (_req, _res) => {
-  const { city } = _req.body;
+  const { cityName } = _req.body;
 
-  if (!city) {
+  if (!cityName) {
     return _res.status(400).json({ error: 'City name is required' });
   }
 
   try {
     // GET weather data from city name
-    const weatherData = await WeatherService.getWeatherForCity(city);
+    const weatherData = await WeatherService.getWeatherForCity(cityName);
     _res.json(weatherData);
 
     // Save city to search history
-    await historyService.addCity(city);
+    await historyService.addCity(cityName);
 
     // Return success message
     return _res.status(200).json({ message: 'City added to search history' });
