@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url"; 
 import axios from "axios";
@@ -39,14 +39,14 @@ app.get("*", (_: Request, res: Response) => {
 });
 
 
-app.get("/api/weather/history", (_, res: Response) => {
-  fs.readFile(searchHistoryPath, "utf8", (err, data) => {
-    if (err) {
-      res.status(500).json({ error: "Could not read search history" });
-      return;
-    }
+app.get("/api/weather/history", async (_, res: Response) => {
+  try {
+    const data = await fs.readFile(searchHistoryPath, "utf8");
     res.json(JSON.parse(data));
-  });
+  } catch (err) {
+    console.error("Error reading search history:", err);
+    res.status(500).json({ error: "Could not read search history" });
+  }
 });
 
 
@@ -59,7 +59,6 @@ app.post("/api/weather", async (req: Request, res: Response) => {
   }
 
   try {
-    
     const geoResponse = await axios.get(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
     );
@@ -81,26 +80,20 @@ app.post("/api/weather", async (req: Request, res: Response) => {
       lon,
     };
 
+    let searchHistory = [];
+    try {
+      const data = await fs.readFile(searchHistoryPath, "utf8");
+      searchHistory = JSON.parse(data);
+    } catch (err) {
+      console.warn("No existing search history, creating new one.");
+    }
 
-    fs.readFile(searchHistoryPath, "utf8", (err, data) => {
-      let searchHistory = [];
-      if (!err && data) {
-        searchHistory = JSON.parse(data);
-      }
-      searchHistory.push(cityData);
-      fs.writeFile(
-        searchHistoryPath,
-        JSON.stringify(searchHistory, null, 2),
-        (err) => {
-          if (err) {
-            res.status(500).json({ error: "Could not save search history" });
-            return;
-          }
-
-          res.json(weatherResponse.data);
-        }
-      );
-    });
+    searchHistory.push(cityData);
+    await fs.writeFile(
+      searchHistoryPath,
+      JSON.stringify(searchHistory, null, 2)
+    );
+    res.json(weatherResponse.data);
   } catch (error) {
     console.error("Error fetching weather data:", error);
     res.status(500).json({ error: "Error fetching weather data" });
@@ -109,33 +102,23 @@ app.post("/api/weather", async (req: Request, res: Response) => {
 
   
 
-app.delete("/api/weather/history/:id", (req: Request, res: Response) => {
+app.delete("/api/weather/history/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  fs.readFile(searchHistoryPath, "utf8", (err, data) => {
-    if (err) {
-      res.status(500).json({ error: "Could not read search history" });
-      return;
-    }
-
+  try {
+    const data = await fs.readFile(searchHistoryPath, "utf8");
     let searchHistory = JSON.parse(data);
     const updatedHistory = searchHistory.filter(
       (city: { id: string }) => city.id !== id
     );
 
-    fs.writeFile(
-      searchHistoryPath,
-      JSON.stringify(updatedHistory, null, 2),
-      (err) => {
-        if (err) {
-          res.status(500).json({ error: "Could not update search history" });
-          return;
-        }
+    await fs.writeFile(searchHistoryPath, JSON.stringify(updatedHistory, null, 2));
+    res.json({ message: "City deleted successfully" });
 
-        res.json({ message: "City deleted successfully" });
-      }
-    );
-  });
+  } catch (err) {
+    console.error("Error deleting city from search history:", err);
+    res.status(500).json({ error: "Could not update search history" });
+  }
 });
 
 app.listen(PORT, () => {
