@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 
 // Initialize the Express application
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // 1. Serve static files from the 'client' folder
 // This line serves all the client-side static assets, such as CSS, JS, and HTML
