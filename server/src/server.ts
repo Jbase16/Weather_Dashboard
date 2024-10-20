@@ -5,7 +5,8 @@ import { fileURLToPath } from "url";
 import axios from "axios";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
-import routes from "./routes/index.js"; 
+import routes from "./routes/index.js";
+
 
 dotenv.config(); 
 
@@ -26,6 +27,8 @@ if (!API_BASE_URL || !API_KEY) {
 
 app.use(express.static(path.join(__dirname, "../../client")));
 
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,9 +37,7 @@ app.use(routes);
 const searchHistoryPath = path.join(__dirname, "../db/searchHistory.json");
 
 
-app.get("*", (_: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "../../client/index.html"));
-});
+
 
 
 app.get("/api/weather/history", async (_, res: Response) => {
@@ -49,6 +50,9 @@ app.get("/api/weather/history", async (_, res: Response) => {
   }
 });
 
+app.get("*", (_: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../../client/index.html"));
+});
 
 app.post("/api/weather", async (req: Request, res: Response) => {
   const { city } = req.body;
