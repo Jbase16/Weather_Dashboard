@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import historyService from '../../service/historyService';
-import WeatherService from '../../service/weatherService';
+import HistoryService from '../../service/historyService.js';
+import WeatherService from '../../service/weatherService.js';
 
 const router = Router();
+const historyService = new HistoryService(); // Instantiate the service
 
 // POST Request with city name to retrieve weather data
 router.post('/', async (_req, _res) => {
@@ -50,4 +51,3 @@ router.delete('/history/:id', async (_req, _res) => {
 });
 
 export default router;
-

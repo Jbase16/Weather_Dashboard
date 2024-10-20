@@ -1,7 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // TODO: Define a City class with name and id properties
 
@@ -16,7 +19,7 @@ class City {
 }
 
 // TODO: Complete the HistoryService class
-class HistoryService {
+class historyService {
   private filePath = path.join(__dirname, "../db/searchHistory.json");
 
   //Define a read method that reads from the searchHistory.json file
@@ -58,4 +61,4 @@ class HistoryService {
   }
 }
 
-export default new HistoryService();
+export default historyService;

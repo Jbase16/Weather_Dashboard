@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 
 // Initialize the Express application
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001; // Changed to 3001
 
 // 1. Serve static files from the 'client' folder
 // This line serves all the client-side static assets, such as CSS, JS, and HTML
@@ -88,7 +88,7 @@ app.post("/api/weather", async (req: Request, res: Response) => {
 
     // Get the 5-day weather forecast data for the coordinates
     const weatherResponse = await axios.get(
-      `${apiBaseUrl.replace('{lat}', lat).replace('{lon}', lon).replace('{API key}', apiKey)}`
+      apiBaseUrl.replace('{lat}', lat).replace('{lon}', lon).replace('{API key}', apiKey)
     );
 
     // Add the city data with a unique ID to searchHistory.json
